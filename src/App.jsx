@@ -3,7 +3,7 @@ import Footer from "./components/Footer";
 import ProgressSummary from "./components/ProgressSummary";
 import CategorySection from "./components/CategorySection";
 import { useEffect, useState } from "react";
-import { supabase } from "./supaBgaseClient";
+import { supabase } from "./supaBaseClient";
 
 export default function App() {
   const [problems, setProblems] = useState([]);
