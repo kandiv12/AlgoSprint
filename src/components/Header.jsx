@@ -1,4 +1,4 @@
-import { supabase } from "../supabaseClient";
+import { supabase } from "../supaBaseClient";
 
 export default function Header({ user }) {
   const handleLogin = async () => {
