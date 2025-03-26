@@ -1,27 +1,27 @@
 export default function ProblemCard({ problem, checked, onToggle }) {
-  // Define Bootstrap badge color based on difficulty
+  // Determine Bootstrap badge class based on difficulty
   const getBadgeClass = (difficulty) => {
     switch (difficulty) {
       case "Easy":
-        return "success"; // Green
+        return "success";
       case "Medium":
-        return "warning"; // Yellow
+        return "warning";
       case "Hard":
-        return "danger"; // Red
+        return "danger";
       default:
-        return "secondary"; // Gray fallback
+        return "secondary";
     }
   };
 
   return (
-    <div className="card mb-2">
+    <div className="card mb-2 shadow-sm">
       <div className="card-body d-flex justify-content-between align-items-center">
         <div>
           <a
             href={problem.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="fw-bold"
+            className="fw-bold text-decoration-none"
           >
             {problem.title}
           </a>
@@ -32,7 +32,12 @@ export default function ProblemCard({ problem, checked, onToggle }) {
           </div>
         </div>
 
-        <input type="checkbox" checked={checked || false} onChange={onToggle} />
+        <input
+          type="checkbox"
+          checked={!!checked}
+          onChange={onToggle}
+          title="Mark as complete"
+        />
       </div>
     </div>
   );

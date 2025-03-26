@@ -8,10 +8,11 @@ export default function CategorySection({
 }) {
   const total = problems.length;
   const solved = problems.filter((p) => progress[p.id]).length;
-  const percent = Math.round((solved / total) * 100);
+  const percent = total > 0 ? Math.round((solved / total) * 100) : 0;
 
   return (
     <section className="mb-5">
+      {/* Section Header */}
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="mb-0">{category}</h5>
         <small className="text-muted">
@@ -19,7 +20,7 @@ export default function CategorySection({
         </small>
       </div>
 
-      {/* Bootstrap Progress Bar */}
+      {/* Progress Bar */}
       <div className="progress mb-3 rounded-pill" style={{ height: "8px" }}>
         <div
           className="progress-bar bg-info rounded-pill"
@@ -32,14 +33,18 @@ export default function CategorySection({
       </div>
 
       {/* Problem List */}
-      {problems.map((problem) => (
-        <ProblemCard
-          key={problem.id}
-          problem={problem}
-          checked={progress[problem.id]}
-          onToggle={() => toggleCheckbox(problem.id)}
-        />
-      ))}
+      {problems.length === 0 ? (
+        <p className="text-muted">No problems in this category.</p>
+      ) : (
+        problems.map((problem) => (
+          <ProblemCard
+            key={problem.id}
+            problem={problem}
+            checked={progress[problem.id]}
+            onToggle={() => toggleCheckbox(problem.id)}
+          />
+        ))
+      )}
     </section>
   );
 }

@@ -2,21 +2,21 @@ export default function ProgressSummary({ problems, progress }) {
   const total = problems.length;
   const solved = problems.filter((p) => progress[p.id]).length;
 
-  // Track stats by difficulty
+  // Difficulty-wise breakdown
   const difficultyStats = problems.reduce((acc, problem) => {
     const diff = problem.difficulty || "Medium";
-    if (!acc[diff]) {
-      acc[diff] = { total: 0, solved: 0 };
-    }
+    if (!acc[diff]) acc[diff] = { total: 0, solved: 0 };
     acc[diff].total += 1;
-    if (progress[problem.id]) {
-      acc[diff].solved += 1;
-    }
+    if (progress[problem.id]) acc[diff].solved += 1;
     return acc;
   }, {});
 
-  // Define desired difficulty order
   const orderedDifficulties = ["Easy", "Medium", "Hard"];
+  const difficultyColors = {
+    Easy: "success",
+    Medium: "warning",
+    Hard: "danger",
+  };
 
   return (
     <div className="mb-4">
@@ -28,18 +28,13 @@ export default function ProgressSummary({ problems, progress }) {
       <div className="row">
         {orderedDifficulties.map((diff) => {
           const stats = difficultyStats[diff] || { total: 0, solved: 0 };
-          const borderColor =
-            diff === "Easy"
-              ? "success"
-              : diff === "Medium"
-              ? "warning"
-              : "danger";
+          const borderColor = difficultyColors[diff] || "secondary";
 
           return (
             <div className="col-sm-4 mb-2" key={diff}>
               <div className={`card border-${borderColor} shadow-sm`}>
                 <div className="card-body">
-                  <h6 className="card-title text-capitalize">{diff}</h6>
+                  <h6 className={`card-title text-${borderColor}`}>{diff}</h6>
                   <p className="card-text mb-0">
                     <strong>{stats.solved}</strong> / {stats.total} solved
                   </p>

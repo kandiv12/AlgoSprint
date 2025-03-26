@@ -1,4 +1,38 @@
-export default function Header() {
+import { supabase } from "../supabaseClient";
+
+export default function Header({ user }) {
+  const handleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin, // ✅ works for local + prod
+        queryParams: {
+          prompt: "select_account", // ✅ always show account picker
+        },
+      },
+    });
+
+    if (error) {
+      alert("Login error: " + error.message);
+      console.error("Supabase login error:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+
+    // Failsafe: clear session token manually
+    localStorage.removeItem("sb-thewcqvbmepuaevxehzg-auth-token");
+
+    if (error) {
+      alert("Logout error: " + error.message);
+      console.error("Supabase logout error:", error);
+    } else {
+      console.log("🔓 Logout successful");
+      window.location.reload(); // optional clean refresh
+    }
+  };
+
   return (
     <header
       className="text-white py-3 shadow"
@@ -7,7 +41,6 @@ export default function Header() {
       }}
     >
       <div className="container d-flex justify-content-between align-items-center flex-wrap">
-        {/* Logo + App Name */}
         <div className="d-flex align-items-center mb-2 mb-md-0">
           <img
             src="/assets/logo.webp"
@@ -23,16 +56,22 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Right Side (Placeholder for buttons or links) */}
         <div>
-          <a
-            href="https://github.com/kandiv12"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-outline-light btn-sm"
-          >
-            ⭐ Star on GitHub
-          </a>
+          {user ? (
+            <div className="d-flex align-items-center gap-2">
+              <span className="text-white-50 small">{user.email}</span>
+              <button
+                onClick={handleLogout}
+                className="btn btn-sm btn-outline-light"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button onClick={handleLogin} className="btn btn-sm btn-light">
+              Continue with Google
+            </button>
+          )}
         </div>
       </div>
     </header>
