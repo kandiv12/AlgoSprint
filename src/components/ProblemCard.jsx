@@ -23,10 +23,7 @@ export default function ProblemCard({ problem, checked, onToggle }) {
             className="fw-bold text-decoration-none"
             title="Open problem in new tab"
           >
-            {problem.title || "Untitled Problem"}{" "}
-            <span className="ms-1" aria-hidden="true">
-              🔗
-            </span>
+            {problem.title || "Untitled Problem"}
           </a>
           <div className="mt-1">
             <span

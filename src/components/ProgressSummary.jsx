@@ -34,9 +34,7 @@ export default function ProgressSummary({ problems, progress }) {
           aria-valuenow={percent}
           aria-valuemin="0"
           aria-valuemax="100"
-        >
-          {percent}%
-        </div>
+        ></div>
       </div>
 
       <div className="row">
@@ -64,9 +62,7 @@ export default function ProgressSummary({ problems, progress }) {
                       aria-valuenow={diffPercent}
                       aria-valuemin="0"
                       aria-valuemax="100"
-                    >
-                      {diffPercent}%
-                    </div>
+                    ></div>
                   </div>
                 </div>
               </div>
