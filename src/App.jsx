@@ -47,16 +47,28 @@ export default function App() {
 
       const {
         data: { session },
+        error: sessionError,
       } = await supabase.auth.getSession();
 
       const tokenUser = session?.user ?? null;
 
-      if (tokenUser) {
-        setUser(tokenUser);
-        await loadUserProgress(tokenUser.id);
-      } else {
+      if (!tokenUser || sessionError) {
+        console.warn("⚠️ Invalid or missing session on load. Logging out.");
+
+        const projectRef = supabase?.supabaseUrl
+          ?.split("https://")[1]
+          ?.split(".")[0];
+        if (projectRef) {
+          localStorage.removeItem(`sb-${projectRef}-auth-token`);
+        }
+
+        await supabase.auth.signOut();
         setUser(null);
         setProgress({});
+      } else {
+        console.log("✅ Valid session found:", tokenUser);
+        setUser(tokenUser);
+        await loadUserProgress(tokenUser.id);
       }
 
       await problemsPromise;
@@ -68,6 +80,8 @@ export default function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("🔄 Auth state changed:", event, session);
+
       const newUser = session?.user ?? null;
       setUser(newUser);
 
