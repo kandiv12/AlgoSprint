@@ -1,5 +1,4 @@
 export default function ProblemCard({ problem, checked, onToggle }) {
-  // Determine Bootstrap badge class based on difficulty
   const getBadgeClass = (difficulty) => {
     switch (difficulty) {
       case "Easy":
@@ -18,26 +17,40 @@ export default function ProblemCard({ problem, checked, onToggle }) {
       <div className="card-body d-flex justify-content-between align-items-center">
         <div>
           <a
-            href={problem.link}
+            href={problem.link || "#"}
             target="_blank"
             rel="noopener noreferrer"
             className="fw-bold text-decoration-none"
+            title="Open problem in new tab"
           >
-            {problem.title}
+            {problem.title || "Untitled Problem"}{" "}
+            <span className="ms-1" aria-hidden="true">
+              🔗
+            </span>
           </a>
           <div className="mt-1">
-            <span className={`badge bg-${getBadgeClass(problem.difficulty)}`}>
-              {problem.difficulty}
+            <span
+              className={`badge bg-${getBadgeClass(problem.difficulty)}`}
+              title={`Difficulty: ${problem.difficulty || "Unknown"}`}
+            >
+              {problem.difficulty || "N/A"}
             </span>
           </div>
         </div>
 
-        <input
-          type="checkbox"
-          checked={!!checked}
-          onChange={onToggle}
-          title="Mark as complete"
-        />
+        <div className="form-check m-0">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id={`check-${problem.id}`}
+            checked={!!checked}
+            onChange={onToggle}
+            title="Mark as complete"
+            aria-label={`Mark ${problem.title} as ${
+              checked ? "incomplete" : "complete"
+            }`}
+          />
+        </div>
       </div>
     </div>
   );

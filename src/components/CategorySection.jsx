@@ -13,10 +13,10 @@ export default function CategorySection({
   return (
     <section className="mb-5">
       {/* Section Header */}
-      <div className="d-flex justify-content-between align-items-center mb-2">
+      <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
         <h5 className="mb-0">{category}</h5>
         <small className="text-muted">
-          {solved} / {total} solved
+          {solved} / {total} solved ({percent}%)
         </small>
       </div>
 
@@ -29,12 +29,15 @@ export default function CategorySection({
           aria-valuenow={percent}
           aria-valuemin="0"
           aria-valuemax="100"
-        ></div>
+          aria-label={`${category} progress: ${percent}%`}
+        />
       </div>
 
       {/* Problem List */}
-      {problems.length === 0 ? (
-        <p className="text-muted">No problems in this category.</p>
+      {total === 0 ? (
+        <div className="text-muted fst-italic">
+          No problems in this category.
+        </div>
       ) : (
         problems.map((problem) => (
           <ProblemCard

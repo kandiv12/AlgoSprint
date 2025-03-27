@@ -21,15 +21,20 @@ export default function Header({ user }) {
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
 
-    // Failsafe: clear session token manually
-    localStorage.removeItem("sb-thewcqvbmepuaevxehzg-auth-token");
+    // ✅ Dynamically extract project ref from supabase.url
+    const projectRef = supabase?.supabaseUrl
+      ?.split("https://")[1]
+      ?.split(".")[0];
+    if (projectRef) {
+      localStorage.removeItem(`sb-${projectRef}-auth-token`);
+    }
 
     if (error) {
       alert("Logout error: " + error.message);
       console.error("Supabase logout error:", error);
     } else {
       console.log("🔓 Logout successful");
-      window.location.reload(); // optional clean refresh
+      window.location.href = window.location.origin; // cleaner than reload
     }
   };
 
@@ -49,6 +54,9 @@ export default function Header({ user }) {
             height="40"
             className="me-2"
             style={{ objectFit: "contain" }}
+            onError={(e) => {
+              e.target.src = "https://via.placeholder.com/40"; // fallback
+            }}
           />
           <div>
             <h1 className="h5 mb-0 fw-bold">AlgoSprint</h1>
@@ -56,9 +64,9 @@ export default function Header({ user }) {
           </div>
         </div>
 
-        <div>
+        <div className="d-flex align-items-center gap-2">
           {user ? (
-            <div className="d-flex align-items-center gap-2">
+            <>
               <span className="text-white-50 small">{user.email}</span>
               <button
                 onClick={handleLogout}
@@ -66,9 +74,13 @@ export default function Header({ user }) {
               >
                 Logout
               </button>
-            </div>
+            </>
           ) : (
-            <button onClick={handleLogin} className="btn btn-sm btn-light">
+            <button
+              onClick={handleLogin}
+              className="btn btn-sm btn-light"
+              aria-label="Sign in with Google"
+            >
               Continue with Google
             </button>
           )}

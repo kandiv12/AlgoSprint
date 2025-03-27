@@ -10,6 +10,7 @@ export default function App() {
   const [progress, setProgress] = useState({});
   const [user, setUser] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
 
   const loadUserProgress = async (userId) => {
     const { data, error } = await supabase
@@ -40,6 +41,10 @@ export default function App() {
 
   useEffect(() => {
     const init = async () => {
+      setLoading(true);
+
+      const problemsPromise = fetchProblems();
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -47,25 +52,15 @@ export default function App() {
       const tokenUser = session?.user ?? null;
 
       if (tokenUser) {
-        const { data: userData, error: userError } =
-          await supabase.auth.getUser();
-
-        if (userError || !userData?.user) {
-          console.warn("Session invalid. Logging out.");
-          await supabase.auth.signOut();
-          localStorage.removeItem("sb-thewcqvbmepuaevxehzg-auth-token");
-          setUser(null);
-          setProgress({});
-        } else {
-          console.log("✅ Valid session:", userData.user);
-          setUser(userData.user);
-          await loadUserProgress(userData.user.id);
-        }
+        setUser(tokenUser);
+        await loadUserProgress(tokenUser.id);
       } else {
         setUser(null);
+        setProgress({});
       }
 
-      await fetchProblems();
+      await problemsPromise;
+      setLoading(false);
     };
 
     init();
@@ -73,7 +68,6 @@ export default function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Auth state change:", event, session);
       const newUser = session?.user ?? null;
       setUser(newUser);
 
@@ -139,7 +133,7 @@ export default function App() {
     <div className="bg-light min-vh-100 d-flex flex-column">
       <Header user={user} />
       <main className="container py-4 flex-grow-1">
-        {!problems.length ? (
+        {loading ? (
           <p className="text-center mt-5">Loading problems...</p>
         ) : (
           <>
