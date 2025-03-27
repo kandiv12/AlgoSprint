@@ -12,6 +12,15 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 
+  const fetchProblems = async () => {
+    const { data, error } = await supabase.from("problems").select("*");
+    if (error) {
+      console.error("Error loading problems:", error.message);
+    } else {
+      setProblems(data);
+    }
+  };
+
   const loadUserProgress = async (userId) => {
     const { data, error } = await supabase
       .from("user_progress")
@@ -30,71 +39,46 @@ export default function App() {
     setProgress(solved);
   };
 
-  const fetchProblems = async () => {
-    const { data, error } = await supabase.from("problems").select("*");
-    if (error) {
-      console.error("Error loading problems:", error.message);
+  const handleSessionChange = async (session) => {
+    const currentUser = session?.user ?? null;
+    setUser(currentUser);
+
+    if (currentUser) {
+      console.log("✅ Valid session found:", currentUser);
+      await loadUserProgress(currentUser.id);
     } else {
-      setProblems(data);
+      console.warn("⚠️ No session. User is logged out.");
+      setProgress({});
     }
+
+    await fetchProblems();
+    setLoading(false);
   };
 
   useEffect(() => {
-    const init = async () => {
+    const setupAuth = async () => {
       setLoading(true);
 
-      const problemsPromise = fetchProblems();
-
+      // 1. Load initial session
       const {
         data: { session },
-        error: sessionError,
       } = await supabase.auth.getSession();
+      await handleSessionChange(session);
 
-      const tokenUser = session?.user ?? null;
+      // 2. Listen for login/logout/session changes
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        console.log("🔄 Auth state changed:", _event, session);
+        handleSessionChange(session);
+      });
 
-      if (!tokenUser || sessionError) {
-        console.warn("⚠️ Invalid or missing session on load. Logging out.");
-
-        const projectRef = supabase?.supabaseUrl
-          ?.split("https://")[1]
-          ?.split(".")[0];
-        if (projectRef) {
-          localStorage.removeItem(`sb-${projectRef}-auth-token`);
-        }
-
-        await supabase.auth.signOut();
-        setUser(null);
-        setProgress({});
-      } else {
-        console.log("✅ Valid session found:", tokenUser);
-        setUser(tokenUser);
-        await loadUserProgress(tokenUser.id);
-      }
-
-      await problemsPromise;
-      setLoading(false);
+      return () => {
+        subscription.unsubscribe();
+      };
     };
 
-    init();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Auth state changed:", event, session);
-
-      const newUser = session?.user ?? null;
-      setUser(newUser);
-
-      if (newUser) {
-        await loadUserProgress(newUser.id);
-      } else {
-        setProgress({});
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    setupAuth();
   }, []);
 
   const toggleCheckbox = async (problemId) => {
