@@ -1,13 +1,13 @@
 import { supabase } from "../supaBaseClient";
 
 export default function Header({ user }) {
-  const handleLogin = async () => {
+  const handleLogin = async (provider) => {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider,
       options: {
-        redirectTo: window.location.origin, // ✅ works for local + prod
+        redirectTo: window.location.origin,
         queryParams: {
-          prompt: "select_account", // ✅ always show account picker
+          prompt: "select_account", // useful for Google
         },
       },
     });
@@ -21,7 +21,6 @@ export default function Header({ user }) {
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
 
-    // ✅ Dynamically extract project ref from supabase.url
     const projectRef = supabase?.supabaseUrl
       ?.split("https://")[1]
       ?.split(".")[0];
@@ -34,7 +33,7 @@ export default function Header({ user }) {
       console.error("Supabase logout error:", error);
     } else {
       console.log("🔓 Logout successful");
-      window.location.href = window.location.origin; // cleaner than reload
+      window.location.href = window.location.origin;
     }
   };
 
@@ -55,7 +54,7 @@ export default function Header({ user }) {
             className="me-2"
             style={{ objectFit: "contain" }}
             onError={(e) => {
-              e.target.src = "https://via.placeholder.com/40"; // fallback
+              e.target.src = "https://via.placeholder.com/40";
             }}
           />
           <div>
@@ -67,7 +66,9 @@ export default function Header({ user }) {
         <div className="d-flex align-items-center gap-2">
           {user ? (
             <>
-              <span className="text-white-50 small">{user.email}</span>
+              <span className="text-white-50 small">
+                {user.email} ({user.identities?.[0]?.provider})
+              </span>
               <button
                 onClick={handleLogout}
                 className="btn btn-sm btn-outline-light"
@@ -76,13 +77,20 @@ export default function Header({ user }) {
               </button>
             </>
           ) : (
-            <button
-              onClick={handleLogin}
-              className="btn btn-sm btn-light"
-              aria-label="Sign in with Google"
-            >
-              Continue with Google
-            </button>
+            <>
+              <button
+                onClick={() => handleLogin("google")}
+                className="btn btn-sm btn-light"
+              >
+                Google Login
+              </button>
+              <button
+                onClick={() => handleLogin("github")}
+                className="btn btn-sm btn-dark"
+              >
+                GitHub Login
+              </button>
+            </>
           )}
         </div>
       </div>
