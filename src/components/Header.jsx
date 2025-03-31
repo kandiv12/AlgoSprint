@@ -7,7 +7,7 @@ export default function Header({ user }) {
       options: {
         redirectTo: window.location.origin,
         queryParams: {
-          prompt: "select_account", // useful for Google
+          prompt: "select_account",
         },
       },
     });
@@ -36,6 +36,8 @@ export default function Header({ user }) {
       window.location.href = window.location.origin;
     }
   };
+
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   return (
     <header
@@ -66,15 +68,26 @@ export default function Header({ user }) {
         <div className="d-flex align-items-center gap-2">
           {user ? (
             <>
-              <span className="text-white-50 small">
-                {user.email} ({user.identities?.[0]?.provider})
-              </span>
-              <button
-                onClick={handleLogout}
-                className="btn btn-sm btn-outline-light"
-              >
-                Logout
-              </button>
+              {avatarUrl && (
+                <img
+                  src={avatarUrl}
+                  alt="User avatar"
+                  width="32"
+                  height="32"
+                  className="rounded-circle"
+                  title={user.email}
+                  style={{ objectFit: "cover", cursor: "pointer" }}
+                  onClick={handleLogout} // Optional: logout on click
+                />
+              )}
+              {!avatarUrl && (
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-sm btn-outline-light"
+                >
+                  Logout
+                </button>
+              )}
             </>
           ) : (
             <>
