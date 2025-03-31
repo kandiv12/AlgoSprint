@@ -1,6 +1,10 @@
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "../supaBaseClient";
 
 export default function Header({ user }) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const handleLogin = async (provider) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
@@ -39,6 +43,18 @@ export default function Header({ user }) {
 
   const avatarUrl = user?.user_metadata?.avatar_url;
 
+  // Close dropdown when clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <header
       className="text-white py-3 shadow"
@@ -67,28 +83,40 @@ export default function Header({ user }) {
 
         <div className="d-flex align-items-center gap-2">
           {user ? (
-            <>
-              {avatarUrl && (
-                <img
-                  src={avatarUrl}
-                  alt="User avatar"
-                  width="32"
-                  height="32"
-                  className="rounded-circle"
-                  title={user.email}
-                  style={{ objectFit: "cover", cursor: "pointer" }}
-                  onClick={handleLogout} // Optional: logout on click
-                />
-              )}
-              {!avatarUrl && (
-                <button
-                  onClick={handleLogout}
-                  className="btn btn-sm btn-outline-light"
+            <div className="position-relative" ref={dropdownRef}>
+              <img
+                src={avatarUrl}
+                alt="User avatar"
+                width="36"
+                height="36"
+                className="rounded-circle border"
+                style={{ objectFit: "cover", cursor: "pointer" }}
+                onClick={() => setDropdownOpen((prev) => !prev)}
+              />
+
+              {dropdownOpen && (
+                <div
+                  className="dropdown-menu show mt-2"
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: "100%",
+                    zIndex: 1000,
+                  }}
                 >
-                  Logout
-                </button>
+                  <span className="dropdown-item-text text-muted small">
+                    {user.email}
+                  </span>
+                  <div className="dropdown-divider"></div>
+                  <button
+                    className="dropdown-item text-danger"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </div>
               )}
-            </>
+            </div>
           ) : (
             <>
               <button
